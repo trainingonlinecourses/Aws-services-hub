@@ -120,13 +120,28 @@ src/
    npm install
    ```
 
-2. **Run Development Server**
+2. **Create local environment file**
+   Copy `.env.example` to `.env` and keep the default local values unless you need a different setup.
+
+3. **Prepare Prisma (optional for local DB features)**
+   ```bash
+   npm run db:generate
+   npm run db:push
+   ```
+
+4. **Run Development Server**
    ```bash
    npm run dev
    ```
 
-3. **Open Application**
+5. **Open Application**
    Navigate to [http://localhost:3000](http://localhost:3000)
+
+6. **Create a production build**
+   ```bash
+   npm run build
+   npm run start
+   ```
 
 ## 📖 Usage Guide
 
@@ -287,6 +302,3 @@ This project is open source and available under the MIT License.
 **Happy Terraforming!** 🚀
 
 Built with ❤️ using Next.js, TypeScript, and Tailwind CSS.
-=======
-# Aws-services-hub
-

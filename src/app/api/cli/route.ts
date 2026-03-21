@@ -21,6 +21,28 @@ interface CLIResponse {
   data?: any
 }
 
+async function getAwsServicesData(query?: { service?: string; project?: string }) {
+  const params = new URLSearchParams()
+
+  if (query?.service) {
+    params.set('service', query.service)
+  }
+
+  if (query?.project) {
+    params.set('project', query.project)
+  }
+
+  const suffix = params.toString()
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000'}/api/aws-services${suffix ? `?${suffix}` : ''}`)
+  const result = await response.json()
+
+  if (!response.ok) {
+    return { success: false, error: result.error || 'Failed to fetch AWS services data' }
+  }
+
+  return result
+}
+
 const cliCommands: CLICommand[] = [
   {
     command: 'generate',
@@ -299,12 +321,16 @@ async function handleGenerate(args: any): Promise<CLIResponse> {
   // Fetch service or project data
   let data: any
   if (service) {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/aws-services?service=${service}`)
-    const result = await response.json()
+    const result = await getAwsServicesData({ service })
+    if (!result.success) {
+      return { success: false, error: result.error || 'Service not found' }
+    }
     data = result.service
   } else if (project) {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/aws-services?project=${project}`)
-    const result = await response.json()
+    const result = await getAwsServicesData({ project })
+    if (!result.success) {
+      return { success: false, error: result.error || 'Project not found' }
+    }
     data = result.project
   } else {
     return { success: false, error: 'Either service or project must be specified' }
@@ -349,8 +375,10 @@ async function handleList(args: any): Promise<CLIResponse> {
     return { success: false, error: 'Type must be "services", "projects", or "categories"' }
   }
   
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/aws-services`)
-  const result = await response.json()
+  const result = await getAwsServicesData()
+  if (!result.success) {
+    return { success: false, error: result.error || 'Failed to fetch items' }
+  }
   
   let items: any[]
   let title: string
@@ -414,13 +442,11 @@ async function handleInfo(args: any): Promise<CLIResponse> {
   }
   
   // Try to get as service first
-  let response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/aws-services?service=${id}`)
-  let result = await response.json()
-  
+  let result = await getAwsServicesData({ service: id })
+
   if (!result.success) {
     // Try to get as project
-    response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/aws-services?project=${id}`)
-    result = await response.json()
+    result = await getAwsServicesData({ project: id })
   }
   
   if (!result.success) {
