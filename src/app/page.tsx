@@ -97,7 +97,7 @@ export default function AWSInfrastructurePlatform() {
   const [cliCommands, setCliCommands] = useState<CLICommand[]>([])
   const [cliOutput, setCliOutput] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState('all')
   const [cliCommand, setCliCommand] = useState('')
   const [cliArgs, setCliArgs] = useState('')
   const [generatedModel, setGeneratedModel] = useState('')
@@ -242,7 +242,7 @@ export default function AWSInfrastructurePlatform() {
       service.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       service.category.toLowerCase().includes(searchTerm.toLowerCase())
     
-    const matchesCategory = !selectedCategory || service.category === selectedCategory
+    const matchesCategory = selectedCategory === 'all' || service.category === selectedCategory
     
     return matchesSearch && matchesCategory
   })
@@ -340,7 +340,7 @@ export default function AWSInfrastructurePlatform() {
                       <SelectValue placeholder="All Categories" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Categories</SelectItem>
+                      <SelectItem value="all">All Categories</SelectItem>
                       {categories.map(category => (
                         <SelectItem key={category} value={category}>
                           {category}
