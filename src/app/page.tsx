@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { ServiceModal } from '@/components/ServiceModal'
 import type { AWSService, CatalogSummary, Project } from '@/lib/aws-types'
 import {
   AlertCircle,
