@@ -735,10 +735,10 @@ export default function AWSInfrastructurePlatform() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-2xl">
                       <Terminal className="h-5 w-5 text-orange-300" />
-                      CLI workflows
+                      npx mac CLI
                     </CardTitle>
                     <CardDescription className="text-slate-300">
-                      Simulate common infrastructure management commands and workflows.
+                      Simulate common infrastructure management commands and workflows. Use with npx mac for real-world CLI experience.
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -777,7 +777,7 @@ export default function AWSInfrastructurePlatform() {
                     {cliOutput && (
                       <div className="space-y-2">
                         <Label>Output</Label>
-                        <pre className="overflow-x-auto rounded-xl bg-black p-4 font-mono text-sm text-green-400">
+                        <pre className="overflow-x-auto rounded-xl bg-slate-950/80 p-4 font-mono text-sm text-green-300">
                           {cliOutput}
                         </pre>
                       </div>
@@ -795,7 +795,7 @@ export default function AWSInfrastructurePlatform() {
                         Infrastructure model generator
                       </CardTitle>
                       <CardDescription className="text-slate-300">
-                        Generate a structured infrastructure model for any service in the catalog.
+                        Generate a structured infrastructure model for any service in the catalog. Outputs both platform YAML and Terraform HCL.
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
@@ -819,10 +819,16 @@ export default function AWSInfrastructurePlatform() {
                         <div className="space-y-2">
                           <Label>Generated model</Label>
                           <Textarea value={generatedModel} readOnly className="min-h-[320px] bg-white/5 font-mono text-sm text-white backdrop-blur-sm" />
-                          <Button variant="outline" onClick={() => downloadText(generatedModel, 'infrastructure-model.yaml')}>
-                            <Download className="mr-2 h-4 w-4" />
-                            Download model
-                          </Button>
+                          <div className="flex gap-2">
+                            <Button variant="outline" onClick={() => downloadText(generatedModel, 'infrastructure-model.yaml')}>
+                              <Download className="mr-2 h-4 w-4" />
+                              Download YAML
+                            </Button>
+                            <Button variant="outline" onClick={() => downloadText(generatedModel, 'infrastructure-model.tf')}>
+                              <Download className="mr-2 h-4 w-4" />
+                              Download Terraform
+                            </Button>
+                          </div>
                         </div>
                       )}
                     </CardContent>
@@ -835,7 +841,7 @@ export default function AWSInfrastructurePlatform() {
                         Deployment generator
                       </CardTitle>
                       <CardDescription className="text-slate-300">
-                        Generate deployment configuration output for the selected service.
+                        Generate deployment configuration output for the selected service. Outputs both platform YAML and Terraform HCL.
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
@@ -859,10 +865,16 @@ export default function AWSInfrastructurePlatform() {
                         <div className="space-y-2">
                           <Label>Generated deployment</Label>
                           <Textarea value={generatedDeployment} readOnly className="min-h-[320px] bg-white/5 font-mono text-sm text-white backdrop-blur-sm" />
-                          <Button variant="outline" onClick={() => downloadText(generatedDeployment, 'deployment.yaml')}>
-                            <Download className="mr-2 h-4 w-4" />
-                            Download deployment
-                          </Button>
+                          <div className="flex gap-2">
+                            <Button variant="outline" onClick={() => downloadText(generatedDeployment, 'deployment.yaml')}>
+                              <Download className="mr-2 h-4 w-4" />
+                              Download YAML
+                            </Button>
+                            <Button variant="outline" onClick={() => downloadText(generatedDeployment, 'deployment.tf')}>
+                              <Download className="mr-2 h-4 w-4" />
+                              Download Terraform
+                            </Button>
+                          </div>
                         </div>
                       )}
                     </CardContent>
@@ -873,7 +885,7 @@ export default function AWSInfrastructurePlatform() {
                   <Alert className="border-green-700/40 bg-green-500/10 text-green-100">
                     <AlertCircle className="h-4 w-4" />
                     <AlertDescription>
-                      Your generated files are ready. Use the CLI tab to continue with deployment-oriented workflows.
+                      Your generated files are ready. Download YAML for platform import or Terraform for direct AWS deployment using npx mac.
                     </AlertDescription>
                   </Alert>
                 )}

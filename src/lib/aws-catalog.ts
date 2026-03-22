@@ -1,7 +1,9 @@
 import type { AWSService, Project } from './aws-types'
 
 // Comprehensive AWS Services Catalog (250+ services)
-export const awsServices: AWSService[] = [
+import { awsServices as extendedServices } from './aws-catalog-source'
+
+const catalogServices: AWSService[] = [
   // COMPUTE SERVICES
   {
     id: 'ec2',
@@ -146,7 +148,9 @@ resource "aws_ecs_service" "web" {
   depends_on = [
     aws_iam_role_policy_attachment.eks_cluster_policy,
   ]
-}`
+}
+
+export const awsServices: AWSService[] = [...catalogServices, ...extendedServices]`
       }
     ],
     pricing_model: 'Per-cluster + per-node',
