@@ -1405,6 +1405,205 @@ resource "aws_db_instance" "patient_data" {
   final_snapshot_identifier = "patient-data-final-snapshot"
   deletion_protection = true
 }`
+  },
+
+  // AI/ML SERVICES
+  {
+    id: 'bedrock',
+    name: 'Amazon Bedrock',
+    category: 'AI/ML',
+    subcategory: 'Foundation Models',
+    description: 'Fully managed service for foundation models',
+    use_cases: ['Text generation', 'Code generation', 'Image generation', 'Embeddings'],
+    dependencies: ['IAM Role', 'VPC'],
+    related_services: ['SageMaker', 'Comprehend', 'Textract', 'Polly'],
+    terraform_resource: 'aws_bedrock_model_invocation_logging',
+    common_configurations: [
+      {
+        name: 'Text Generation',
+        description: 'Configure Bedrock for text generation',
+        terraform_code: `resource "aws_bedrock_model_invocation_logging" "example" {
+  log_group_name = aws_cloudwatch_log_group.bedrock.name
+  log_role_arn   = aws_iam_role.bedrock_logging.arn
+}`
+      }
+    ],
+    pricing_model: 'Pay-per-token',
+    compliance_features: ['Encryption', 'Access Control', 'Audit Logging']
+  },
+  {
+    id: 'sagemaker',
+    name: 'Amazon SageMaker',
+    category: 'AI/ML',
+    subcategory: 'Machine Learning',
+    description: 'Build, train, and deploy machine learning models',
+    use_cases: ['Model training', 'Hyperparameter tuning', 'Model deployment', 'Data labeling'],
+    dependencies: ['S3', 'IAM Role', 'EC2'],
+    related_services: ['Bedrock', 'Comprehend', 'Rekognition', 'Lex'],
+    terraform_resource: 'aws_sagemaker_model',
+    common_configurations: [
+      {
+        name: 'Training Job',
+        description: 'SageMaker training job configuration',
+        terraform_code: `resource "aws_sagemaker_training_job" "example" {
+  training_job_name = "my-training-job"
+  role_arn          = aws_iam_role.sagemaker.arn
+
+  resource_config {
+    instance_count = 1
+    instance_type  = "ml.m5.large"
+  }
+
+  algorithm_specification {
+    training_image = "763104351884.dkr.ecr.us-east-1.amazonaws.com/huggingface-pytorch-train:latest"
+    training_input_mode = "File"
+  }
+}`
+      }
+    ],
+    pricing_model: 'Pay-per-training-hour + storage',
+    compliance_features: ['VPC Isolation', 'Encryption', 'Audit Logging']
+  },
+  {
+    id: 'rekognition',
+    name: 'Amazon Rekognition',
+    category: 'AI/ML',
+    subcategory: 'Computer Vision',
+    description: 'Image and video analysis',
+    use_cases: ['Object detection', 'Face analysis', 'Text extraction', 'Content moderation'],
+    dependencies: ['S3', 'IAM Role'],
+    related_services: ['Textract', 'Comprehend', 'Polly', 'Transcribe'],
+    terraform_resource: 'aws_rekognition_collection',
+    common_configurations: [
+      {
+        name: 'Face Collection',
+        description: 'Create face collection for facial recognition',
+        terraform_code: `resource "aws_rekognition_collection" "example" {
+  collection_id = "my-face-collection"
+}`
+      }
+    ],
+    pricing_model: 'Pay-per-image/video',
+    compliance_features: ['Encryption', 'Access Control', 'Audit Logging']
+  },
+
+  // DATABASE SERVICES
+  {
+    id: 'neptune',
+    name: 'Amazon Neptune',
+    category: 'Database',
+    subcategory: 'Graph Database',
+    description: 'Fast, reliable graph database service',
+    use_cases: ['Social networks', 'Recommendation engines', 'Fraud detection', 'Knowledge graphs'],
+    dependencies: ['VPC', 'Subnet', 'Security Group'],
+    related_services: ['RDS', 'DynamoDB', 'Aurora'],
+    terraform_resource: 'aws_neptune_cluster',
+    common_configurations: [
+      {
+        name: 'Neptune Cluster',
+        description: 'Multi-AZ Neptune cluster',
+        terraform_code: `resource "aws_neptune_cluster" "example" {
+  cluster_identifier = "neptune-cluster"
+  engine             = "neptune"
+  engine_version     = "1.2.1.1"
+  backup_retention_period = 5
+  preferred_backup_window = "07:00-09:00"
+  skip_final_snapshot = false
+}`
+      }
+    ],
+    pricing_model: 'Pay-per-instance + storage',
+    compliance_features: ['Encryption', 'IAM Integration', 'Audit Logging']
+  },
+  {
+    id: 'timestream',
+    name: 'Amazon Timestream',
+    category: 'Database',
+    subcategory: 'Time Series',
+    description: 'Serverless time series database',
+    use_cases: ['IoT data', 'Application metrics', 'DevOps monitoring', 'Real-time analytics'],
+    dependencies: ['IAM Role', 'Kinesis'],
+    related_services: ['CloudWatch', 'Kinesis', 'S3'],
+    terraform_resource: 'aws_timestream_database',
+    common_configurations: [
+      {
+        name: 'Time Series Database',
+        description: 'Timestream database configuration',
+        terraform_code: `resource "aws_timestream_database" "example" {
+  database_name = "sensor-data"
+
+  tags = {
+    Environment = "production"
+  }
+}`
+      }
+    ],
+    pricing_model: 'Pay-per-query + storage',
+    compliance_features: ['Encryption', 'Access Control', 'Audit Logging']
+  },
+
+  // MESSAGING SERVICES
+  {
+    id: 'sns',
+    name: 'Amazon SNS',
+    category: 'Messaging',
+    subcategory: 'Pub/Sub',
+    description: 'Fully managed pub/sub messaging service',
+    use_cases: ['Mobile push notifications', 'Event-driven architectures', 'System notifications'],
+    dependencies: ['IAM Role', 'SQS'],
+    related_services: ['SQS', 'Lambda', 'EventBridge', 'S3'],
+    terraform_resource: 'aws_sns_topic',
+    common_configurations: [
+      {
+        name: 'SNS Topic',
+        description: 'Standard SNS topic with subscriptions',
+        terraform_code: `resource "aws_sns_topic" "example" {
+  name = "notifications-topic"
+
+  delivery_policy = jsonencode({
+    healthyRetryPolicy = {
+      numRetries = 10
+      minDelayTarget = 2
+      maxDelayTarget = 20
+    }
+  })
+}`
+      }
+    ],
+    pricing_model: 'Pay-per-request + delivery',
+    compliance_features: ['Encryption', 'Access Control', 'Audit Logging']
+  },
+  {
+    id: 'mq',
+    name: 'Amazon MQ',
+    category: 'Messaging',
+    subcategory: 'Message Broker',
+    description: 'Managed message broker service',
+    use_cases: ['Enterprise messaging', 'Application integration', 'Legacy system migration'],
+    dependencies: ['VPC', 'Subnet', 'Security Group'],
+    related_services: ['SNS', 'SQS', 'EventBridge'],
+    terraform_resource: 'aws_mq_broker',
+    common_configurations: [
+      {
+        name: 'ActiveMQ Broker',
+        description: 'ActiveMQ broker configuration',
+        terraform_code: `resource "aws_mq_broker" "example" {
+  broker_name = "production-broker"
+  engine_type = "ActiveMQ"
+  engine_version = "5.17.6"
+  host_instance_type = "mq.t3.micro"
+
+  deployment_mode = "SINGLE_INSTANCE"
+
+  user {
+    username = "admin"
+    password = "password123!"
+  }
+}`
+      }
+    ],
+    pricing_model: 'Pay-per-broker-hour',
+    compliance_features: ['VPC Isolation', 'Encryption', 'Audit Logging']
   }
 ]
 

@@ -116,6 +116,7 @@ export default function AWSInfrastructurePlatform() {
   const [generatedModel, setGeneratedModel] = useState('')
   const [generatedDeployment, setGeneratedDeployment] = useState('')
   const [isDesktop, setIsDesktop] = useState(true)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     loadData()
@@ -130,6 +131,7 @@ export default function AWSInfrastructurePlatform() {
 
   const loadData = async () => {
     try {
+      setIsLoading(true)
       const servicesResponse = await fetch('/api/aws-services')
       const servicesData = await servicesResponse.json()
       if (servicesData.success) {
@@ -146,6 +148,8 @@ export default function AWSInfrastructurePlatform() {
       }
     } catch (error) {
       console.error('Failed to load data:', error)
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -637,7 +641,12 @@ export default function AWSInfrastructurePlatform() {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    {filteredServices.length === 0 ? (
+                    {isLoading ? (
+                      <div className="flex items-center justify-center py-8">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-400"></div>
+                        <span className="ml-3 text-slate-300">Loading services...</span>
+                      </div>
+                    ) : filteredServices.length === 0 ? (
                       <div className="rounded-2xl border border-dashed border-white/10 glass-subtle p-10 text-center">
                         <p className="text-lg font-medium text-white">No services match this search yet.</p>
                         <p className="mt-2 text-sm text-slate-400">Try a different category or search by architecture use case.</p>
@@ -699,33 +708,40 @@ export default function AWSInfrastructurePlatform() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid gap-4 md:grid-cols-2">
-                      {projects.map((project) => (
-                        <Card key={project.id} className="glass rounded-2xl text-white">
-                          <CardHeader>
-                            <div className="flex flex-wrap gap-2">
-                              <Badge className={getComplexityColor(project.complexity)}>{project.complexity}</Badge>
-                              <Badge variant="outline">{project.estimated_cost}</Badge>
-                            </div>
-                            <CardTitle className="text-lg">{project.name}</CardTitle>
-                            <CardDescription className="text-slate-300">{project.description}</CardDescription>
-                          </CardHeader>
-                          <CardContent className="space-y-4">
-                            <div className="flex flex-wrap gap-2">
-                              {project.services.slice(0, 6).map((service) => (
-                                <Badge key={service} variant="secondary">
-                                  {service}
-                                </Badge>
-                              ))}
-                            </div>
-                            <Button className="w-full" onClick={() => setSelectedProjectId(project.id)}>
-                              <Eye className="mr-2 h-4 w-4" />
-                              View blueprint
-                            </Button>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
+                    {isLoading ? (
+                      <div className="flex items-center justify-center py-8">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-400"></div>
+                        <span className="ml-3 text-slate-300">Loading projects...</span>
+                      </div>
+                    ) : (
+                      <div className="grid gap-4 md:grid-cols-2">
+                        {projects.map((project) => (
+                          <Card key={project.id} className="glass rounded-2xl text-white">
+                            <CardHeader>
+                              <div className="flex flex-wrap gap-2">
+                                <Badge className={getComplexityColor(project.complexity)}>{project.complexity}</Badge>
+                                <Badge variant="outline">{project.estimated_cost}</Badge>
+                              </div>
+                              <CardTitle className="text-lg">{project.name}</CardTitle>
+                              <CardDescription className="text-slate-300">{project.description}</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                              <div className="flex flex-wrap gap-2">
+                                {project.services.slice(0, 6).map((service) => (
+                                  <Badge key={service} variant="secondary">
+                                    {service}
+                                  </Badge>
+                                ))}
+                              </div>
+                              <Button className="w-full" onClick={() => setSelectedProjectId(project.id)}>
+                                <Eye className="mr-2 h-4 w-4" />
+                                View blueprint
+                              </Button>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -742,45 +758,54 @@ export default function AWSInfrastructurePlatform() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="cli-command">Command</Label>
-                      <Select value={cliCommand} onValueChange={setCliCommand}>
-                        <SelectTrigger className="border-white/10 bg-white/5 text-white backdrop-blur-sm">
-                          <SelectValue placeholder="Select command" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {cliCommands.map((command) => (
-                            <SelectItem key={command.command} value={command.command}>
-                              {command.command} - {command.description}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="cli-args">Arguments</Label>
-                      <Input
-                        id="cli-args"
-                        placeholder="e.g. -o basemodel.yaml -t model -service ec2"
-                        value={cliArgs}
-                        onChange={(event) => setCliArgs(event.target.value)}
-                        className="border-white/10 bg-white/5 text-white placeholder:text-slate-500 backdrop-blur-sm"
-                      />
-                    </div>
-
-                    <Button onClick={executeCLICommand} className="w-full bg-orange-600 hover:bg-orange-500">
-                      <Play className="mr-2 h-4 w-4" />
-                      Execute command
-                    </Button>
-
-                    {cliOutput && (
-                      <div className="space-y-2">
-                        <Label>Output</Label>
-                        <pre className="overflow-x-auto rounded-xl bg-slate-950/80 p-4 font-mono text-sm text-green-300">
-                          {cliOutput}
-                        </pre>
+                    {isLoading ? (
+                      <div className="flex items-center justify-center py-8">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-400"></div>
+                        <span className="ml-3 text-slate-300">Loading CLI...</span>
                       </div>
+                    ) : (
+                      <>
+                        <div className="space-y-2">
+                          <Label htmlFor="cli-command">Command</Label>
+                          <Select value={cliCommand} onValueChange={setCliCommand}>
+                            <SelectTrigger className="border-white/10 bg-white/5 text-white backdrop-blur-sm">
+                              <SelectValue placeholder="Select command" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {cliCommands.map((command) => (
+                                <SelectItem key={command.command} value={command.command}>
+                                  {command.command} - {command.description}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="cli-args">Arguments</Label>
+                          <Input
+                            id="cli-args"
+                            placeholder="e.g. -o basemodel.yaml -t model -service ec2"
+                            value={cliArgs}
+                            onChange={(event) => setCliArgs(event.target.value)}
+                            className="border-white/10 bg-white/5 text-white placeholder:text-slate-500 backdrop-blur-sm"
+                          />
+                        </div>
+
+                        <Button onClick={executeCLICommand} className="w-full bg-orange-600 hover:bg-orange-500">
+                          <Play className="mr-2 h-4 w-4" />
+                          Execute command
+                        </Button>
+
+                        {cliOutput && (
+                          <div className="space-y-2">
+                            <Label>Output</Label>
+                            <pre className="overflow-x-auto rounded-xl bg-slate-950/80 p-4 font-mono text-sm text-green-300">
+                              {cliOutput}
+                            </pre>
+                          </div>
+                        )}
+                      </>
                     )}
                   </CardContent>
                 </Card>
