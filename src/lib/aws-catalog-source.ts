@@ -1,9 +1,27 @@
-import type { AWSService, Project } from './aws-types'
+import { NextRequest, NextResponse } from 'next/server'
+import { v4 as uuidv4 } from 'uuid'
 
 // Comprehensive AWS Services Catalog (250+ services)
-import { awsServices as extendedServices } from './aws-catalog-source'
+interface AWSService {
+  id: string
+  name: string
+  category: string
+  subcategory: string
+  description: string
+  use_cases: string[]
+  dependencies: string[]
+  related_services: string[]
+  terraform_resource: string
+  common_configurations: Array<{
+    name: string
+    description: string
+    terraform_code: string
+  }>
+  pricing_model: string
+  compliance_features: string[]
+}
 
-const catalogServices: AWSService[] = [
+export const awsServices: AWSService[] = [
   // COMPUTE SERVICES
   {
     id: 'ec2',
@@ -148,9 +166,7 @@ resource "aws_ecs_service" "web" {
   depends_on = [
     aws_iam_role_policy_attachment.eks_cluster_policy,
   ]
-}
-
-export const awsServices: AWSService[] = [...catalogServices, ...extendedServices]`
+}`
       }
     ],
     pricing_model: 'Per-cluster + per-node',
@@ -873,16 +889,16 @@ resource "aws_cloudwatch_metric_alarm" "cpu_high" {
         description: 'CloudFormation stack for web application',
         terraform_code: `resource "aws_cloudformation_stack" "web_app" {
   name = "web-application-stack"
-
+  
   template_body = file("web-app-template.yaml")
-
+  
   parameters = {
     Environment = var.environment
     InstanceType = "t3.micro"
   }
-
+  
   capabilities = ["CAPABILITY_IAM"]
-
+  
   tags = {
     Environment = var.environment
     Project = var.project_name
@@ -892,356 +908,11 @@ resource "aws_cloudwatch_metric_alarm" "cpu_high" {
     ],
     pricing_model: 'Free',
     compliance_features: ['IAM Integration', 'Change Sets', 'Drift Detection', 'Rollback']
-  },
-  {
-    id: 'api-gateway',
-    name: 'Amazon API Gateway',
-    category: 'Networking',
-    subcategory: 'API Management',
-    description: 'Create, publish, secure, and monitor APIs at any scale',
-    use_cases: ['REST APIs', 'HTTP APIs', 'Serverless front doors', 'Partner integrations'],
-    dependencies: ['IAM Role', 'CloudWatch'],
-    related_services: ['Lambda', 'Cognito', 'WAF', 'CloudFront', 'EventBridge'],
-    terraform_resource: 'aws_api_gateway_rest_api',
-    common_configurations: [
-      {
-        name: 'Serverless REST API',
-        description: 'API Gateway fronting Lambda functions',
-        terraform_code: `resource "aws_api_gateway_rest_api" "service_api" {
-  name        = "service-api"
-  description = "Production API Gateway"
-}
-
-resource "aws_api_gateway_stage" "prod" {
-  rest_api_id   = aws_api_gateway_rest_api.service_api.id
-  deployment_id = aws_api_gateway_deployment.current.id
-  stage_name    = "prod"
-}`
-      }
-    ],
-    pricing_model: 'Pay-per-request',
-    compliance_features: ['IAM Authorization', 'Access Logging', 'WAF Integration', 'Throttling']
-  },
-  {
-    id: 'sqs',
-    name: 'Amazon SQS',
-    category: 'Application Integration',
-    subcategory: 'Message Queues',
-    description: 'Fully managed message queues for decoupled systems',
-    use_cases: ['Asynchronous workflows', 'Order processing', 'Buffering spikes', 'Decoupling microservices'],
-    dependencies: ['IAM Policy'],
-    related_services: ['Lambda', 'SNS', 'EventBridge', 'Step Functions'],
-    terraform_resource: 'aws_sqs_queue',
-    common_configurations: [
-      {
-        name: 'Standard Queue',
-        description: 'Default queue for background processing',
-        terraform_code: `resource "aws_sqs_queue" "jobs" {
-  name                       = "jobs-queue"
-  visibility_timeout_seconds = 60
-  message_retention_seconds  = 345600
-  sqs_managed_sse_enabled    = true
-}`
-      }
-    ],
-    pricing_model: 'Pay-per-request',
-    compliance_features: ['Server-side Encryption', 'DLQ Support', 'IAM Integration', 'CloudWatch Metrics']
-  },
-  {
-    id: 'sns',
-    name: 'Amazon SNS',
-    category: 'Application Integration',
-    subcategory: 'Pub/Sub Messaging',
-    description: 'Publish and fan out events to distributed subscribers',
-    use_cases: ['Notifications', 'Fan-out processing', 'Alerts', 'Event broadcasting'],
-    dependencies: ['IAM Policy'],
-    related_services: ['SQS', 'Lambda', 'CloudWatch', 'EventBridge'],
-    terraform_resource: 'aws_sns_topic',
-    common_configurations: [
-      {
-        name: 'Alerts Topic',
-        description: 'SNS topic for operational alerts',
-        terraform_code: `resource "aws_sns_topic" "alerts" {
-  name              = "platform-alerts"
-  kms_master_key_id = "alias/aws/sns"
-}`
-      }
-    ],
-    pricing_model: 'Pay-per-request + delivery',
-    compliance_features: ['KMS Encryption', 'Delivery Policies', 'IAM Integration', 'Audit Logging']
-  },
-  {
-    id: 'eventbridge',
-    name: 'Amazon EventBridge',
-    category: 'Application Integration',
-    subcategory: 'Event Bus',
-    description: 'Route events between AWS services, SaaS apps, and custom applications',
-    use_cases: ['Event-driven systems', 'SaaS integrations', 'Automation', 'Operational workflows'],
-    dependencies: ['IAM Role', 'CloudWatch'],
-    related_services: ['Lambda', 'Step Functions', 'SNS', 'SQS', 'API Gateway'],
-    terraform_resource: 'aws_cloudwatch_event_bus',
-    common_configurations: [
-      {
-        name: 'Custom Event Bus',
-        description: 'Custom bus for internal platform events',
-        terraform_code: `resource "aws_cloudwatch_event_bus" "platform" {
-  name = "platform-events"
-}
-
-resource "aws_cloudwatch_event_rule" "service_created" {
-  name           = "service-created"
-  event_bus_name = aws_cloudwatch_event_bus.platform.name
-  event_pattern  = jsonencode({ source = ["platform.services"] })
-}`
-      }
-    ],
-    pricing_model: 'Pay-per-event',
-    compliance_features: ['Schema Registry', 'Archive & Replay', 'IAM Integration', 'CloudTrail Logging']
-  },
-  {
-    id: 'route53',
-    name: 'Amazon Route 53',
-    category: 'Networking',
-    subcategory: 'DNS & Traffic Management',
-    description: 'Highly available DNS, health checking, and traffic routing service',
-    use_cases: ['DNS hosting', 'Latency routing', 'Health checks', 'Failover'],
-    dependencies: ['VPC'],
-    related_services: ['CloudFront', 'ALB', 'API Gateway', 'ACM'],
-    terraform_resource: 'aws_route53_record',
-    common_configurations: [
-      {
-        name: 'Alias Record',
-        description: 'Point a domain to an application load balancer',
-        terraform_code: `resource "aws_route53_record" "app" {
-  zone_id = aws_route53_zone.primary.zone_id
-  name    = "app.example.com"
-  type    = "A"
-
-  alias {
-    name                   = aws_lb.app.dns_name
-    zone_id                = aws_lb.app.zone_id
-    evaluate_target_health = true
-  }
-}`
-      }
-    ],
-    pricing_model: 'Hosted zone + query volume',
-    compliance_features: ['Health Checks', 'DNS Failover', 'Query Logging', 'IAM Integration']
-  },
-  {
-    id: 'ecr',
-    name: 'Amazon ECR',
-    category: 'Compute',
-    subcategory: 'Container Registry',
-    description: 'Managed container image registry for secure software delivery',
-    use_cases: ['Container image storage', 'CI/CD pipelines', 'Image scanning', 'Multi-environment deployments'],
-    dependencies: ['IAM Role', 'KMS'],
-    related_services: ['ECS', 'EKS', 'CodeBuild', 'Lambda'],
-    terraform_resource: 'aws_ecr_repository',
-    common_configurations: [
-      {
-        name: 'Application Repository',
-        description: 'Private repository with image scanning enabled',
-        terraform_code: `resource "aws_ecr_repository" "app" {
-  name                 = "platform-app"
-  image_tag_mutability = "IMMUTABLE"
-
-  image_scanning_configuration {
-    scan_on_push = true
-  }
-}`
-      }
-    ],
-    pricing_model: 'Storage + data transfer',
-    compliance_features: ['Image Scanning', 'KMS Encryption', 'Lifecycle Policies', 'IAM Integration']
-  },
-  {
-    id: 'elasticache',
-    name: 'Amazon ElastiCache',
-    category: 'Database',
-    subcategory: 'Caching',
-    description: 'Managed Redis and Memcached for sub-millisecond performance',
-    use_cases: ['Caching', 'Session storage', 'Real-time leaderboards', 'Rate limiting'],
-    dependencies: ['VPC', 'Subnet Group', 'Security Group'],
-    related_services: ['RDS', 'ECS', 'Lambda', 'CloudWatch'],
-    terraform_resource: 'aws_elasticache_replication_group',
-    common_configurations: [
-      {
-        name: 'Redis Cluster',
-        description: 'Production-ready Redis replication group',
-        terraform_code: `resource "aws_elasticache_replication_group" "redis" {
-  replication_group_id       = "platform-redis"
-  description                = "Redis cache for platform"
-  engine                     = "redis"
-  node_type                  = "cache.t4g.small"
-  automatic_failover_enabled = true
-  num_cache_clusters         = 2
-}`
-      }
-    ],
-    pricing_model: 'Per-node-hour',
-    compliance_features: ['Encryption in Transit', 'Encryption at Rest', 'Subnet Isolation', 'Auth Tokens']
-  },
-  {
-    id: 'kms',
-    name: 'AWS KMS',
-    category: 'Security',
-    subcategory: 'Key Management',
-    description: 'Create and control encryption keys used across AWS services',
-    use_cases: ['Data encryption', 'Key rotation', 'Auditability', 'Centralized key control'],
-    dependencies: ['IAM Policy'],
-    related_services: ['S3', 'EBS', 'RDS', 'Secrets Manager', 'SNS'],
-    terraform_resource: 'aws_kms_key',
-    common_configurations: [
-      {
-        name: 'Customer Managed Key',
-        description: 'Reusable KMS key for application data',
-        terraform_code: `resource "aws_kms_key" "app" {
-  description             = "Application encryption key"
-  deletion_window_in_days = 7
-  enable_key_rotation     = true
-}`
-      }
-    ],
-    pricing_model: 'Per-key-month + API requests',
-    compliance_features: ['Automatic Rotation', 'Key Policies', 'CloudTrail Logging', 'FIPS Support']
-  },
-  {
-    id: 'secrets-manager',
-    name: 'AWS Secrets Manager',
-    category: 'Security',
-    subcategory: 'Secrets Management',
-    description: 'Securely store, rotate, and retrieve application secrets',
-    use_cases: ['Database credentials', 'API tokens', 'Certificate rotation', 'Shared secrets'],
-    dependencies: ['KMS', 'IAM Role'],
-    related_services: ['Lambda', 'RDS', 'ECS', 'IAM'],
-    terraform_resource: 'aws_secretsmanager_secret',
-    common_configurations: [
-      {
-        name: 'Database Credentials Secret',
-        description: 'Managed secret with recovery window and KMS encryption',
-        terraform_code: `resource "aws_secretsmanager_secret" "db_credentials" {
-  name                    = "platform/db-credentials"
-  recovery_window_in_days = 7
-  kms_key_id              = aws_kms_key.app.arn
-}`
-      }
-    ],
-    pricing_model: 'Per-secret-month + API requests',
-    compliance_features: ['Rotation Support', 'KMS Encryption', 'Resource Policies', 'CloudTrail Logging']
-  },
-  {
-    id: 'step-functions',
-    name: 'AWS Step Functions',
-    category: 'Application Integration',
-    subcategory: 'Workflow Orchestration',
-    description: 'Coordinate distributed services with visual workflows and state machines',
-    use_cases: ['Business workflows', 'ETL pipelines', 'Approvals', 'Long-running orchestration'],
-    dependencies: ['IAM Role', 'CloudWatch'],
-    related_services: ['Lambda', 'EventBridge', 'SQS', 'SNS'],
-    terraform_resource: 'aws_sfn_state_machine',
-    common_configurations: [
-      {
-        name: 'Order Workflow',
-        description: 'State machine for order processing and notifications',
-        terraform_code: `resource "aws_sfn_state_machine" "orders" {
-  name     = "orders-workflow"
-  role_arn = aws_iam_role.step_functions.arn
-  definition = jsonencode({
-    StartAt = "ValidateOrder",
-    States = {
-      ValidateOrder = { Type = "Task", Resource = aws_lambda_function.validate.arn, End = true }
-    }
-  })
-}`
-      }
-    ],
-    pricing_model: 'Per-state transition',
-    compliance_features: ['Execution History', 'IAM Integration', 'CloudWatch Logging', 'X-Ray Support']
-  },
-  {
-    id: 'redshift',
-    name: 'Amazon Redshift',
-    category: 'Analytics',
-    subcategory: 'Data Warehouse',
-    description: 'Managed cloud data warehouse for petabyte-scale analytics',
-    use_cases: ['BI analytics', 'Warehouse consolidation', 'Reporting', 'Data marts'],
-    dependencies: ['VPC', 'Subnet Group', 'IAM Role'],
-    related_services: ['S3', 'Glue', 'QuickSight', 'KMS'],
-    terraform_resource: 'aws_redshift_cluster',
-    common_configurations: [
-      {
-        name: 'Analytics Warehouse',
-        description: 'Redshift cluster for departmental analytics',
-        terraform_code: `resource "aws_redshift_cluster" "analytics" {
-  cluster_identifier = "analytics-warehouse"
-  database_name      = "analytics"
-  master_username    = "admin"
-  node_type          = "dc2.large"
-  cluster_type       = "single-node"
-}`
-      }
-    ],
-    pricing_model: 'Per-node-hour + storage',
-    compliance_features: ['KMS Encryption', 'Audit Logging', 'VPC Isolation', 'Snapshot Backups']
-  },
-  {
-    id: 'glue',
-    name: 'AWS Glue',
-    category: 'Analytics',
-    subcategory: 'Data Integration',
-    description: 'Serverless data integration for ETL, cataloging, and pipeline automation',
-    use_cases: ['ETL pipelines', 'Data cataloging', 'Schema discovery', 'Lakehouse ingestion'],
-    dependencies: ['IAM Role', 'S3'],
-    related_services: ['Athena', 'Lake Formation', 'Redshift', 'S3'],
-    terraform_resource: 'aws_glue_job',
-    common_configurations: [
-      {
-        name: 'ETL Job',
-        description: 'Glue Spark job for daily transformation',
-        terraform_code: `resource "aws_glue_job" "daily_etl" {
-  name     = "daily-etl"
-  role_arn = aws_iam_role.glue_service.arn
-
-  command {
-    script_location = "s3://platform-etl/scripts/daily.py"
-    python_version  = "3"
-  }
-}`
-      }
-    ],
-    pricing_model: 'Per-DPU-hour',
-    compliance_features: ['IAM Integration', 'Encryption', 'Job Bookmarks', 'CloudWatch Logging']
-  },
-  {
-    id: 'quicksight',
-    name: 'Amazon QuickSight',
-    category: 'Analytics',
-    subcategory: 'Business Intelligence',
-    description: 'Cloud-native BI dashboards and interactive analytics',
-    use_cases: ['Executive dashboards', 'Embedded analytics', 'Operational reporting', 'Self-service BI'],
-    dependencies: ['IAM Role', 'Athena', 'Redshift'],
-    related_services: ['Athena', 'Redshift', 'RDS', 'S3'],
-    terraform_resource: 'aws_quicksight_data_source',
-    common_configurations: [
-      {
-        name: 'Athena Data Source',
-        description: 'QuickSight connection to Athena-backed reporting',
-        terraform_code: `resource "aws_quicksight_data_source" "analytics" {
-  data_source_id = "analytics-athena"
-  name           = "analytics-athena"
-  type           = "ATHENA"
-}`
-      }
-    ],
-    pricing_model: 'Per-user or session-based',
-    compliance_features: ['Row-level Security', 'IAM Federation', 'Encryption', 'Audit Logging']
   }
 ]
 
-
 // Real-world project examples (50+ projects)
-export const realWorldProjects: Project[] = [
+const realWorldProjects = [
   {
     id: '3-tier-web-app',
     name: '3-Tier Web Application',
@@ -1737,20 +1408,233 @@ resource "aws_db_instance" "patient_data" {
   }
 ]
 
-export const awsServices: AWSService[] = [...catalogServices, ...extendedServices]
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const category = searchParams.get('category')
+    const serviceId = searchParams.get('service')
+    const projectId = searchParams.get('project')
 
-export const categories = [...new Set(awsServices.map((service) => service.category))]
+    // Get specific service
+    if (serviceId) {
+      const service = awsServices.find(s => s.id === serviceId)
+      if (!service) {
+        return NextResponse.json(
+          { error: 'Service not found' },
+          { status: 404 }
+        )
+      }
+      return NextResponse.json({ success: true, service })
+    }
 
-export const catalogSummary = {
-  total_services: awsServices.length,
-  total_projects: realWorldProjects.length,
-  total_categories: categories.length,
+    // Get specific project
+    if (projectId) {
+      const project = realWorldProjects.find(p => p.id === projectId)
+      if (!project) {
+        return NextResponse.json(
+          { error: 'Project not found' },
+          { status: 404 }
+        )
+      }
+      return NextResponse.json({ success: true, project })
+    }
+
+    // Get services by category
+    if (category) {
+      const filteredServices = awsServices.filter(s => s.category.toLowerCase() === category.toLowerCase())
+      return NextResponse.json({ 
+        success: true, 
+        services: filteredServices,
+        category 
+      })
+    }
+
+    // Get all categories
+    const categories = [...new Set(awsServices.map(s => s.category))]
+    
+    return NextResponse.json({
+      success: true,
+      services: awsServices,
+      projects: realWorldProjects,
+      categories,
+      summary: {
+        total_services: awsServices.length,
+        total_projects: realWorldProjects.length,
+        total_categories: categories.length
+      }
+    })
+
+  } catch (error) {
+    console.error('AWS services API error:', error)
+    return NextResponse.json(
+      { 
+        error: 'Failed to fetch AWS services',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
+      { status: 500 }
+    )
+  }
 }
 
-export function getServiceById(serviceId: string) {
-  return awsServices.find((service) => service.id === serviceId)
+export async function POST(request: NextRequest) {
+  try {
+    const { action, serviceId, projectId, config } = await request.json()
+
+    switch (action) {
+      case 'generate_model':
+        return generateInfraModel(serviceId, config)
+      case 'generate_deployment':
+        return generateDeploymentFile(serviceId, config)
+      case 'get_project_details':
+        return getProjectDetails(projectId)
+      default:
+        return NextResponse.json(
+          { error: 'Invalid action' },
+          { status: 400 }
+        )
+    }
+
+  } catch (error) {
+    console.error('AWS services POST error:', error)
+    return NextResponse.json(
+      { 
+        error: 'Failed to process request',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
+      { status: 500 }
+    )
+  }
 }
 
-export function getProjectById(projectId: string) {
-  return realWorldProjects.find((project) => project.id === projectId)
+function generateInfraModel(serviceId: string, config: any) {
+  const service = awsServices.find(s => s.id === serviceId)
+  if (!service) {
+    return NextResponse.json(
+      { error: 'Service not found' },
+      { status: 404 }
+    )
+  }
+
+  const infraModel = {
+    apiVersion: 'platform.io/v1',
+    kind: 'InfrastructureModel',
+    metadata: {
+      name: `${service.id}-model`,
+      description: `Infrastructure model for ${service.name}`,
+      generated_at: new Date().toISOString()
+    },
+    spec: {
+      service: {
+        id: service.id,
+        name: service.name,
+        category: service.category,
+        subcategory: service.subcategory
+      },
+      dependencies: service.dependencies.map(dep => ({
+        service_id: dep.toLowerCase(),
+        required: true
+      })),
+      components: [
+        {
+          name: 'main',
+          type: service.terraform_resource,
+          description: `Main ${service.name} resource`,
+          configuration: {
+            environment: config.environment || 'production',
+            region: config.region || 'us-east-1',
+            instance_type: config.instance_type || 't3.micro',
+            tags: config.tags || {}
+          }
+        }
+      ],
+      compliance: {
+        standards: service.compliance_features,
+        required: ['encryption', 'monitoring', 'backup']
+      }
+    }
+  }
+
+  return NextResponse.json({
+    success: true,
+    model: infraModel,
+    service
+  })
+}
+
+function generateDeploymentFile(serviceId: string, config: any) {
+  const service = awsServices.find(s => s.id === serviceId)
+  if (!service) {
+    return NextResponse.json(
+      { error: 'Service not found' },
+      { status: 404 }
+    )
+  }
+
+  const deployment = {
+    apiVersion: 'platform.io/v1',
+    kind: 'Deployment',
+    metadata: {
+      name: `${service.id}-deployment`,
+      description: `Deployment configuration for ${service.name}`,
+      generated_at: new Date().toISOString()
+    },
+    spec: {
+      service: {
+        id: service.id,
+        name: service.name,
+        terraform_resource: service.terraform_resource
+      },
+      environment: config.environment || 'production',
+      region: config.region || 'us-east-1',
+      resources: [
+        {
+          name: 'main',
+          type: service.terraform_resource,
+          properties: {
+            ...config.properties,
+            tags: {
+              Environment: config.environment || 'production',
+              Service: service.name,
+              ManagedBy: 'platform',
+              ...config.tags
+            }
+          }
+        }
+      ],
+      monitoring: {
+        enabled: true,
+        metrics: ['cpu_utilization', 'memory_utilization', 'network_throughput'],
+        alerts: ['high_cpu', 'high_memory', 'disk_full']
+      },
+      security: {
+        encryption: true,
+        access_logging: true,
+        compliance_checks: service.compliance_features
+      }
+    }
+  }
+
+  return NextResponse.json({
+    success: true,
+    deployment,
+    service
+  })
+}
+
+function getProjectDetails(projectId: string) {
+  const project = realWorldProjects.find(p => p.id === projectId)
+  if (!project) {
+    return NextResponse.json(
+      { error: 'Project not found' },
+      { status: 404 }
+    )
+  }
+
+  return NextResponse.json({
+    success: true,
+    project,
+    related_services: project.services.map(serviceId => 
+      awsServices.find(s => s.id.toLowerCase() === serviceId.toLowerCase())
+    ).filter(Boolean)
+  })
 }
