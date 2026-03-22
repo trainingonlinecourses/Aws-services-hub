@@ -332,16 +332,16 @@ export default function AWSInfrastructurePlatform() {
     <div className="flex h-full flex-col">
       <div className="border-b px-6 py-4">
         <div className="flex items-start gap-3">
-          <div className="rounded-lg bg-orange-100 p-2 text-orange-700">
+          <div className="rounded-lg bg-orange-500/20 p-2 text-orange-300">
             {getCategoryIcon(selectedService.category)}
           </div>
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-2">
-              <h3 className="text-xl font-semibold text-slate-900">{selectedService.name}</h3>
+              <h3 className="text-xl font-semibold text-white">{selectedService.name}</h3>
               <Badge variant="secondary">{selectedService.category}</Badge>
               <Badge variant="outline">{selectedService.subcategory}</Badge>
             </div>
-            <p className="text-sm text-slate-600">{selectedService.description}</p>
+            <p className="text-sm text-slate-300">{selectedService.description}</p>
           </div>
         </div>
       </div>
@@ -375,8 +375,8 @@ export default function AWSInfrastructurePlatform() {
                 </CardHeader>
                 <CardContent className="space-y-2">
                   {selectedService.use_cases.map((useCase) => (
-                    <div key={useCase} className="flex items-start gap-2 text-sm text-slate-700">
-                      <CheckCircle className="mt-0.5 h-4 w-4 text-green-600" />
+                    <div key={useCase} className="flex items-start gap-2 text-sm text-slate-200">
+                      <CheckCircle className="mt-0.5 h-4 w-4 text-green-400" />
                       <span>{useCase}</span>
                     </div>
                   ))}
@@ -438,7 +438,7 @@ export default function AWSInfrastructurePlatform() {
                 </CardHeader>
                 <CardContent className="flex flex-wrap gap-2">
                   {selectedService.compliance_features.map((feature) => (
-                    <Badge key={feature} variant="outline" className="border-green-700 text-green-700">
+                    <Badge key={feature} variant="outline" className="border-green-400/40 text-green-300">
                       <Lock className="mr-1 h-3 w-3" />
                       {feature}
                     </Badge>
@@ -453,9 +453,9 @@ export default function AWSInfrastructurePlatform() {
   ) : null
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-50">
+    <div className="galaxy-bg min-h-screen text-slate-50">
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <div className="overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800 shadow-2xl">
+        <div className="glass-strong overflow-hidden rounded-3xl shadow-2xl glow-purple">
           <div className="border-b border-white/10 px-6 py-12 lg:px-10">
             <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
               <div className="space-y-6">
@@ -482,21 +482,21 @@ export default function AWSInfrastructurePlatform() {
               </div>
 
               <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
-                <Card className="border-white/10 bg-white/5 text-white">
+                <Card className="glass rounded-2xl text-white glow-orange">
                   <CardHeader className="pb-3">
                     <CardDescription className="text-slate-300">Services</CardDescription>
                     <CardTitle className="text-3xl">{summary.total_services}</CardTitle>
                   </CardHeader>
                   <CardContent className="text-sm text-slate-300">Curated core cloud services with dependencies, configs, and compliance notes.</CardContent>
                 </Card>
-                <Card className="border-white/10 bg-white/5 text-white">
+                <Card className="glass rounded-2xl text-white">
                   <CardHeader className="pb-3">
                     <CardDescription className="text-slate-300">Projects</CardDescription>
                     <CardTitle className="text-3xl">{summary.total_projects}</CardTitle>
                   </CardHeader>
                   <CardContent className="text-sm text-slate-300">Real architecture examples that connect multiple AWS services into deployable patterns.</CardContent>
                 </Card>
-                <Card className="border-white/10 bg-white/5 text-white">
+                <Card className="glass rounded-2xl text-white">
                   <CardHeader className="pb-3">
                     <CardDescription className="text-slate-300">Categories</CardDescription>
                     <CardTitle className="text-3xl">{summary.total_categories}</CardTitle>
@@ -521,7 +521,7 @@ export default function AWSInfrastructurePlatform() {
               </div>
               <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                 {featuredServices.map((service) => (
-                  <Card key={service.id} className="border-white/10 bg-white/5 text-white">
+                  <Card key={service.id} className="glass rounded-2xl text-white transition hover:-translate-y-1 hover:shadow-xl glow-orange">
                     <CardHeader>
                       <div className="flex items-center gap-2 text-orange-300">
                         {getCategoryIcon(service.category)}
@@ -573,7 +573,7 @@ export default function AWSInfrastructurePlatform() {
             </section>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-              <TabsList className="grid h-auto w-full grid-cols-2 gap-2 rounded-2xl bg-slate-900 p-2 md:grid-cols-5">
+              <TabsList className="grid h-auto w-full grid-cols-2 gap-2 rounded-2xl glass p-2 md:grid-cols-5">
                 <TabsTrigger value="services" className="flex items-center gap-2">
                   <Server className="h-4 w-4" />
                   Services
@@ -597,7 +597,7 @@ export default function AWSInfrastructurePlatform() {
               </TabsList>
 
               <TabsContent value="services" className="space-y-6">
-                <Card className="border-white/10 bg-slate-900 text-white">
+                <Card className="glass-strong rounded-2xl text-white">
                   <CardHeader className="space-y-4">
                     <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                       <div>
@@ -619,10 +619,10 @@ export default function AWSInfrastructurePlatform() {
                         placeholder="Search services, use cases, and categories..."
                         value={searchTerm}
                         onChange={(event) => setSearchTerm(event.target.value)}
-                        className="border-white/10 bg-slate-950 text-white placeholder:text-slate-500"
+                        className="border-white/10 bg-white/5 text-white placeholder:text-slate-500 backdrop-blur-sm"
                       />
                       <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                        <SelectTrigger className="border-white/10 bg-slate-950 text-white">
+                        <SelectTrigger className="border-white/10 bg-white/5 text-white backdrop-blur-sm">
                           <SelectValue placeholder="All categories" />
                         </SelectTrigger>
                         <SelectContent>
@@ -638,14 +638,14 @@ export default function AWSInfrastructurePlatform() {
                   </CardHeader>
                   <CardContent>
                     {filteredServices.length === 0 ? (
-                      <div className="rounded-2xl border border-dashed border-white/10 bg-slate-950 p-10 text-center">
+                      <div className="rounded-2xl border border-dashed border-white/10 glass-subtle p-10 text-center">
                         <p className="text-lg font-medium text-white">No services match this search yet.</p>
                         <p className="mt-2 text-sm text-slate-400">Try a different category or search by architecture use case.</p>
                       </div>
                     ) : (
                       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                         {filteredServices.map((service) => (
-                          <Card key={service.id} className="border-white/10 bg-slate-950 text-white transition hover:-translate-y-0.5 hover:border-orange-400/40 hover:shadow-xl">
+                          <Card key={service.id} className="glass rounded-2xl text-white transition hover:-translate-y-0.5 hover:border-orange-400/40 hover:shadow-xl">
                             <CardHeader className="space-y-3 pb-3">
                               <div className="flex items-center gap-2 text-orange-300">
                                 {getCategoryIcon(service.category)}
@@ -688,7 +688,7 @@ export default function AWSInfrastructurePlatform() {
               </TabsContent>
 
               <TabsContent value="projects" className="space-y-6">
-                <Card className="border-white/10 bg-slate-900 text-white">
+                <Card className="glass-strong rounded-2xl text-white">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-2xl">
                       <Package className="h-5 w-5 text-orange-300" />
@@ -701,7 +701,7 @@ export default function AWSInfrastructurePlatform() {
                   <CardContent>
                     <div className="grid gap-4 md:grid-cols-2">
                       {projects.map((project) => (
-                        <Card key={project.id} className="border-white/10 bg-slate-950 text-white">
+                        <Card key={project.id} className="glass rounded-2xl text-white">
                           <CardHeader>
                             <div className="flex flex-wrap gap-2">
                               <Badge className={getComplexityColor(project.complexity)}>{project.complexity}</Badge>
@@ -731,7 +731,7 @@ export default function AWSInfrastructurePlatform() {
               </TabsContent>
 
               <TabsContent value="cli" className="space-y-6">
-                <Card className="border-white/10 bg-slate-900 text-white">
+                <Card className="glass-strong rounded-2xl text-white">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-2xl">
                       <Terminal className="h-5 w-5 text-orange-300" />
@@ -745,7 +745,7 @@ export default function AWSInfrastructurePlatform() {
                     <div className="space-y-2">
                       <Label htmlFor="cli-command">Command</Label>
                       <Select value={cliCommand} onValueChange={setCliCommand}>
-                        <SelectTrigger className="border-white/10 bg-slate-950 text-white">
+                        <SelectTrigger className="border-white/10 bg-white/5 text-white backdrop-blur-sm">
                           <SelectValue placeholder="Select command" />
                         </SelectTrigger>
                         <SelectContent>
@@ -765,7 +765,7 @@ export default function AWSInfrastructurePlatform() {
                         placeholder="e.g. -o basemodel.yaml -t model -service ec2"
                         value={cliArgs}
                         onChange={(event) => setCliArgs(event.target.value)}
-                        className="border-white/10 bg-slate-950 text-white placeholder:text-slate-500"
+                        className="border-white/10 bg-white/5 text-white placeholder:text-slate-500 backdrop-blur-sm"
                       />
                     </div>
 
@@ -788,7 +788,7 @@ export default function AWSInfrastructurePlatform() {
 
               <TabsContent value="generator" className="space-y-6">
                 <div className="grid gap-6 xl:grid-cols-2">
-                  <Card className="border-white/10 bg-slate-900 text-white">
+                  <Card className="glass-strong rounded-2xl text-white">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2 text-xl">
                         <FileText className="h-5 w-5 text-orange-300" />
@@ -802,7 +802,7 @@ export default function AWSInfrastructurePlatform() {
                       <div className="space-y-2">
                         <Label htmlFor="model-service">Select service</Label>
                         <Select onValueChange={generateModel}>
-                          <SelectTrigger className="border-white/10 bg-slate-950 text-white">
+                          <SelectTrigger className="border-white/10 bg-white/5 text-white backdrop-blur-sm">
                             <SelectValue placeholder="Choose a service" />
                           </SelectTrigger>
                           <SelectContent>
@@ -818,7 +818,7 @@ export default function AWSInfrastructurePlatform() {
                       {generatedModel && (
                         <div className="space-y-2">
                           <Label>Generated model</Label>
-                          <Textarea value={generatedModel} readOnly className="min-h-[320px] bg-slate-950 font-mono text-sm text-white" />
+                          <Textarea value={generatedModel} readOnly className="min-h-[320px] bg-white/5 font-mono text-sm text-white backdrop-blur-sm" />
                           <Button variant="outline" onClick={() => downloadText(generatedModel, 'infrastructure-model.yaml')}>
                             <Download className="mr-2 h-4 w-4" />
                             Download model
@@ -828,7 +828,7 @@ export default function AWSInfrastructurePlatform() {
                     </CardContent>
                   </Card>
 
-                  <Card className="border-white/10 bg-slate-900 text-white">
+                  <Card className="glass-strong rounded-2xl text-white">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2 text-xl">
                         <Rocket className="h-5 w-5 text-orange-300" />
@@ -842,7 +842,7 @@ export default function AWSInfrastructurePlatform() {
                       <div className="space-y-2">
                         <Label htmlFor="deployment-service">Select service</Label>
                         <Select onValueChange={generateDeployment}>
-                          <SelectTrigger className="border-white/10 bg-slate-950 text-white">
+                          <SelectTrigger className="border-white/10 bg-white/5 text-white backdrop-blur-sm">
                             <SelectValue placeholder="Choose a service" />
                           </SelectTrigger>
                           <SelectContent>
@@ -858,7 +858,7 @@ export default function AWSInfrastructurePlatform() {
                       {generatedDeployment && (
                         <div className="space-y-2">
                           <Label>Generated deployment</Label>
-                          <Textarea value={generatedDeployment} readOnly className="min-h-[320px] bg-slate-950 font-mono text-sm text-white" />
+                          <Textarea value={generatedDeployment} readOnly className="min-h-[320px] bg-white/5 font-mono text-sm text-white backdrop-blur-sm" />
                           <Button variant="outline" onClick={() => downloadText(generatedDeployment, 'deployment.yaml')}>
                             <Download className="mr-2 h-4 w-4" />
                             Download deployment
@@ -880,7 +880,7 @@ export default function AWSInfrastructurePlatform() {
               </TabsContent>
 
               <TabsContent value="connections" className="space-y-6">
-                <Card className="border-white/10 bg-slate-900 text-white">
+                <Card className="glass-strong rounded-2xl text-white">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-2xl">
                       <Network className="h-5 w-5 text-orange-300" />
@@ -893,7 +893,7 @@ export default function AWSInfrastructurePlatform() {
                   <CardContent>
                     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                       {connectionExamples.map((example) => (
-                        <Card key={example.title} className={`border-2 ${example.color} bg-slate-950 text-white`}>
+                        <Card key={example.title} className={`border ${example.color} glass rounded-2xl text-white`}>
                           <CardHeader>
                             <CardTitle className="text-lg">{example.title}</CardTitle>
                           </CardHeader>
@@ -917,7 +917,7 @@ export default function AWSInfrastructurePlatform() {
       </div>
 
       <Sheet open={Boolean(selectedService && isDesktop)} onOpenChange={(open) => !open && closeServiceDetails()}>
-        <SheetContent className="w-full border-white/10 bg-white p-0 text-slate-900 sm:max-w-2xl">
+        <SheetContent className="w-full border-white/10 bg-slate-950/95 backdrop-blur-xl p-0 text-white sm:max-w-2xl">
           <SheetHeader className="sr-only">
             <SheetTitle>{selectedService?.name ?? 'Service details'}</SheetTitle>
             <SheetDescription>{selectedService?.description ?? 'Inspect service details and configurations.'}</SheetDescription>
@@ -927,7 +927,7 @@ export default function AWSInfrastructurePlatform() {
       </Sheet>
 
       <Drawer open={Boolean(selectedService && !isDesktop)} onOpenChange={(open) => !open && closeServiceDetails()}>
-        <DrawerContent className="max-h-[88vh] bg-white text-slate-900">
+        <DrawerContent className="max-h-[88vh] bg-slate-950/95 backdrop-blur-xl text-white">
           <DrawerHeader className="sr-only">
             <DrawerTitle>{selectedService?.name ?? 'Service details'}</DrawerTitle>
             <DrawerDescription>{selectedService?.description ?? 'Inspect service details and configurations.'}</DrawerDescription>
@@ -937,8 +937,8 @@ export default function AWSInfrastructurePlatform() {
       </Drawer>
 
       <Sheet open={Boolean(selectedProject)} onOpenChange={(open) => !open && closeProjectDetails()}>
-        <SheetContent className="w-full border-white/10 bg-white p-0 text-slate-900 sm:max-w-2xl">
-          <SheetHeader className="border-b px-6 py-4">
+        <SheetContent className="w-full border-white/10 bg-slate-950/95 backdrop-blur-xl p-0 text-white sm:max-w-2xl">
+          <SheetHeader className="border-b border-white/10 px-6 py-4">
             <SheetTitle>{selectedProject?.name ?? 'Project details'}</SheetTitle>
             <SheetDescription>{selectedProject?.description ?? 'Inspect the selected architecture blueprint.'}</SheetDescription>
           </SheetHeader>
