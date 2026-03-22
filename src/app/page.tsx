@@ -135,6 +135,7 @@ export default function AWSInfrastructurePlatform() {
       setIsLoading(true)
       const servicesResponse = await fetch('/api/aws-services')
       const servicesData = await servicesResponse.json()
+
       if (servicesData.success) {
         setServices(servicesData.services)
         setProjects(servicesData.projects)
@@ -762,42 +763,32 @@ export default function AWSInfrastructurePlatform() {
                       </div>
                     ) : (
                       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                        {filteredServices.map((service) => (
-                          <Card key={service.id} className="glass rounded-2xl text-white transition hover:-translate-y-0.5 hover:border-orange-400/40 hover:shadow-xl">
-                            <CardHeader className="space-y-3 pb-3">
+                        {filteredServices.map((service, index) => (
+                          <div key={service.id || index} className="glass rounded-2xl text-white transition hover:-translate-y-0.5 hover:border-orange-400/40 hover:shadow-xl border border-white/10">
+                            <div className="space-y-3 pb-3 p-4">
                               <div className="flex items-center gap-2 text-orange-300">
-                                {getCategoryIcon(service.category)}
-                                <span className="text-sm">{service.category}</span>
+                                <span className="text-sm font-medium">{service.category || 'Unknown'}</span>
                               </div>
                               <div>
-                                <CardTitle className="text-lg">{service.name}</CardTitle>
-                                <CardDescription className="text-slate-300">{service.subcategory}</CardDescription>
+                                <h3 className="text-lg font-semibold">{service.name || 'Unnamed Service'}</h3>
+                                <p className="text-sm text-slate-300">{service.subcategory || service.description || 'No description'}</p>
                               </div>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                              <p className="text-sm text-slate-300">{service.description}</p>
+                            </div>
+                            <div className="p-4 space-y-4">
+                              <p className="text-sm text-slate-300">{service.description || 'No description available'}</p>
                               <div className="flex flex-wrap gap-2">
-                                <Badge variant="secondary">{service.pricing_model}</Badge>
-                                {service.use_cases.slice(0, 2).map((useCase) => (
-                                  <Badge key={useCase} variant="outline">{useCase}</Badge>
-                                ))}
+                                <span className="inline-block bg-white/5 text-white px-2 py-1 rounded text-xs border border-white/10">{service.pricing_model || 'Unknown'}</span>
                               </div>
                               <div className="flex flex-wrap gap-2">
-                                <Button variant="outline" size="sm" onClick={() => setSelectedServiceId(service.id)}>
-                                  <Info className="mr-2 h-4 w-4" />
+                                <button
+                                  onClick={() => setSelectedServiceId(service.id)}
+                                  className="bg-white/10 hover:bg-white/20 text-white px-3 py-1 rounded text-sm border border-white/20"
+                                >
                                   Details
-                                </Button>
-                                <Button size="sm" onClick={() => generateModel(service.id)}>
-                                  <FileText className="mr-2 h-4 w-4" />
-                                  Model
-                                </Button>
-                                <Button size="sm" variant="secondary" onClick={() => generateDeployment(service.id)}>
-                                  <Rocket className="mr-2 h-4 w-4" />
-                                  Deploy
-                                </Button>
+                                </button>
                               </div>
-                            </CardContent>
-                          </Card>
+                            </div>
+                          </div>
                         ))}
                       </div>
                     )}
