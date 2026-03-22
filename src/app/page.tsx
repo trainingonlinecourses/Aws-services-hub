@@ -44,6 +44,7 @@ import {
   Sparkles,
   Terminal,
   Zap,
+  Home,
 } from 'lucide-react'
 
 interface CLICommand {
@@ -96,7 +97,7 @@ const connectionExamples = [
 ]
 
 export default function AWSInfrastructurePlatform() {
-  const [activeTab, setActiveTab] = useState('services')
+  const [activeTab, setActiveTab] = useState('home')
   const [services, setServices] = useState<AWSService[]>([])
   const [projects, setProjects] = useState<Project[]>([])
   const [categories, setCategories] = useState<string[]>([])
@@ -476,10 +477,18 @@ export default function AWSInfrastructurePlatform() {
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-3">
-                  <Button onClick={() => setActiveTab('services')} className="bg-orange-600 hover:bg-orange-500">
+                  <Button
+                    onClick={() => setActiveTab('services')}
+                    disabled={isLoading || summary.total_services === 0}
+                    className="bg-orange-600 hover:bg-orange-500"
+                  >
                     Browse services
                   </Button>
-                  <Button variant="outline" onClick={() => setActiveTab('projects')}>
+                  <Button
+                    variant="outline"
+                    onClick={() => setActiveTab('projects')}
+                    disabled={isLoading || summary.total_projects === 0}
+                  >
                     Explore projects
                   </Button>
                 </div>
@@ -577,7 +586,11 @@ export default function AWSInfrastructurePlatform() {
             </section>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-              <TabsList className="grid h-auto w-full grid-cols-2 gap-2 rounded-2xl glass p-2 md:grid-cols-5">
+              <TabsList className="grid h-auto w-full grid-cols-2 gap-2 rounded-2xl glass p-2 md:grid-cols-6">
+                <TabsTrigger value="home" className="flex items-center gap-2">
+                  <Home className="h-4 w-4" />
+                  Home
+                </TabsTrigger>
                 <TabsTrigger value="services" className="flex items-center gap-2">
                   <Server className="h-4 w-4" />
                   Services
@@ -599,6 +612,97 @@ export default function AWSInfrastructurePlatform() {
                   Connections
                 </TabsTrigger>
               </TabsList>
+
+              <TabsContent value="home" className="space-y-6">
+                <div className="space-y-6 px-6 py-6 lg:px-10">
+                  <section className="space-y-4">
+                    <div className="flex items-center justify-between gap-4">
+                      <div>
+                        <h2 className="text-xl font-semibold text-white">Featured services</h2>
+                        <p className="text-sm text-slate-300">Jump straight into the services most teams reach for first.</p>
+                      </div>
+                      <Button variant="ghost" className="text-slate-200" onClick={() => setActiveTab('services')}>
+                        Full catalog
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </div>
+                    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                      {featuredServices.map((service) => (
+                        <Card key={service.id} className="glass rounded-2xl text-white transition hover:-translate-y-1 hover:shadow-xl glow-orange">
+                          <CardHeader>
+                            <div className="flex items-center gap-2 text-orange-300">
+                              {getCategoryIcon(service.category)}
+                              <span className="text-sm font-medium">{service.category}</span>
+                            </div>
+                            <CardTitle className="text-lg">{service.name}</CardTitle>
+                            <CardDescription className="text-slate-300">{service.description}</CardDescription>
+                          </CardHeader>
+                          <CardContent className="space-y-3">
+                            <div className="flex flex-wrap gap-1">
+                              {service.dependencies.slice(0, 3).map((dep) => (
+                                <Badge key={dep} variant="secondary" className="text-xs">
+                                  {dep}
+                                </Badge>
+                              ))}
+                              {service.dependencies.length > 3 && (
+                                <Badge variant="outline" className="text-xs">
+                                  +{service.dependencies.length - 3} more
+                                </Badge>
+                              )}
+                            </div>
+                            <div className="flex gap-2">
+                              <Button size="sm" variant="secondary" onClick={() => setSelectedServiceId(service.id)}>
+                                <Eye className="mr-2 h-4 w-4" />
+                                Details
+                              </Button>
+                              <Button size="sm" variant="outline" onClick={() => generateModel(service.id)}>
+                                <Code className="mr-2 h-4 w-4" />
+                                Generate Model
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </section>
+
+                  <section className="space-y-4">
+                    <div>
+                      <h2 className="text-xl font-semibold text-white">Recent projects</h2>
+                      <p className="text-sm text-slate-300">Architecture patterns and real-world examples.</p>
+                    </div>
+                    <div className="grid gap-4 md:grid-cols-2">
+                      {topProjects.map((project) => (
+                        <Card key={project.id} className="glass rounded-2xl text-white">
+                          <CardHeader>
+                            <div className="flex flex-wrap gap-2">
+                              <Badge className={getComplexityColor(project.complexity)}>{project.complexity}</Badge>
+                              <Badge variant="outline">{project.estimated_cost}</Badge>
+                            </div>
+                            <CardTitle className="text-lg">{project.name}</CardTitle>
+                            <CardDescription className="text-slate-300">{project.description}</CardDescription>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="flex flex-wrap gap-2">
+                              {project.services.slice(0, 6).map((service) => (
+                                <Badge key={service} variant="secondary">
+                                  {service}
+                                </Badge>
+                              ))}
+                            </div>
+                            <Button className="mt-4 w-full" onClick={() => {
+                              setActiveTab('projects')
+                              setSelectedProjectId(project.id)
+                            }}>
+                              View project
+                            </Button>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </section>
+                </div>
+              </TabsContent>
 
               <TabsContent value="services" className="space-y-6">
                 <Card className="glass-strong rounded-2xl text-white">
@@ -623,9 +727,14 @@ export default function AWSInfrastructurePlatform() {
                         placeholder="Search services, use cases, and categories..."
                         value={searchTerm}
                         onChange={(event) => setSearchTerm(event.target.value)}
+                        disabled={isLoading || categories.length === 0}
                         className="border-white/10 bg-white/5 text-white placeholder:text-slate-500 backdrop-blur-sm"
                       />
-                      <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                      <Select
+                        value={selectedCategory}
+                        onValueChange={setSelectedCategory}
+                        disabled={isLoading || categories.length === 0}
+                      >
                         <SelectTrigger className="border-white/10 bg-white/5 text-white backdrop-blur-sm">
                           <SelectValue placeholder="All categories" />
                         </SelectTrigger>
